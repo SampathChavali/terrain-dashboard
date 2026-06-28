@@ -60,6 +60,18 @@ body {
   pointer-events: none;
 }
 
+.terrain-overlay-auth {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(10, 28, 20, 0.72) 0%,
+    rgba(15, 40, 30, 0.65) 45%,
+    rgba(20, 35, 28, 0.7) 100%
+  );
+  pointer-events: none;
+}
+
 /* ── Apple-style glass ── */
 .glass {
   background: rgba(255, 255, 255, 0.45);
@@ -340,11 +352,26 @@ select {
 .login-card {
   border-radius: 1.75rem;
   padding: 2rem 2rem 2.25rem;
-  color: white;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.35),
+    0 4px 16px rgba(0, 0, 0, 0.12);
+  color: var(--color-text);
+}
+
+.login-card .login-icon {
+  background: var(--color-green-bg);
+  border: 1px solid var(--color-green-pale);
 }
 
 .login-field-box {
-  /* glass-inset handles styling */
+  background: #f3f4f6;
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 0.875rem 1rem;
 }
 
 .login-input {
@@ -352,14 +379,25 @@ select {
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
   border-radius: 0.75rem;
-  color: white;
+  color: var(--color-text);
+  background: #ffffff !important;
+  border: 1px solid var(--color-border-strong) !important;
 }
-.login-input::placeholder { color: rgba(255, 255, 255, 0.5); }
+.login-input::placeholder { color: var(--color-muted); }
 .login-input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.55) !important;
-  background: rgba(255, 255, 255, 0.22) !important;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+  border-color: var(--color-green-accent) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(64, 145, 108, 0.2);
+}
+
+.login-error {
+  font-size: 0.875rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .login-btn {
@@ -369,10 +407,16 @@ select {
   padding: 0.625rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-green-primary);
+  color: #ffffff;
+  background: var(--color-green-primary) !important;
+  border: 1px solid var(--color-green-dark) !important;
   border-radius: 9999px;
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 14px rgba(27, 67, 50, 0.35);
+}
+.login-btn:hover {
+  background: var(--color-green-mid) !important;
 }
 
 .card-compact {

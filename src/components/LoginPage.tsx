@@ -65,19 +65,19 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
   const isRegister = mode === 'register'
 
   return (
-    <TerrainBackground className="min-h-screen flex items-center justify-center p-6">
+    <TerrainBackground auth className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md">
-        <div className="login-card glass-panel">
+        <div className="login-card">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl glass-icon mb-4">
+            <div className="login-icon inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4">
               {isRegister ? (
-                <UserPlus className="w-7 h-7 text-white" />
+                <UserPlus className="w-7 h-7 text-green-primary" />
               ) : (
-                <LayoutDashboard className="w-7 h-7 text-white" />
+                <LayoutDashboard className="w-7 h-7 text-green-primary" />
               )}
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Terrain</h1>
-            <p className="text-sm text-white/75 mt-2">
+            <h1 className="text-3xl font-bold text-text tracking-tight">Terrain</h1>
+            <p className="text-sm text-muted mt-2">
               {isRegister
                 ? 'Create your account and start managing projects.'
                 : 'Sign in to manage projects and daily updates.'}
@@ -85,8 +85,8 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
           </div>
 
           <form onSubmit={isRegister ? handleRegister : handleSignIn} className="space-y-4">
-            <div className="login-field-box glass-inset">
-              <label className="block text-sm font-medium text-white/90 mb-1.5">Username</label>
+            <div className="login-field-box">
+              <label className="block text-sm font-semibold text-text mb-1.5">Username</label>
               <input
                 type="text"
                 value={username}
@@ -95,14 +95,14 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
                   clearError()
                 }}
                 placeholder="Choose a username"
-                className="login-input glass-input"
+                className="login-input"
                 autoFocus
                 autoComplete="username"
               />
             </div>
 
-            <div className="login-field-box glass-inset">
-              <label className="block text-sm font-medium text-white/90 mb-1.5">Password</label>
+            <div className="login-field-box">
+              <label className="block text-sm font-semibold text-text mb-1.5">Password</label>
               <input
                 type="password"
                 value={password}
@@ -111,14 +111,14 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
                   clearError()
                 }}
                 placeholder={isRegister ? 'At least 6 characters' : 'Enter your password'}
-                className="login-input glass-input"
+                className="login-input"
                 autoComplete={isRegister ? 'new-password' : 'current-password'}
               />
             </div>
 
             {isRegister && (
-              <div className="login-field-box glass-inset">
-                <label className="block text-sm font-medium text-white/90 mb-1.5">
+              <div className="login-field-box">
+                <label className="block text-sm font-semibold text-text mb-1.5">
                   Confirm password
                 </label>
                 <input
@@ -129,20 +129,18 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
                     clearError()
                   }}
                   placeholder="Re-enter your password"
-                  className="login-input glass-input"
+                  className="login-input"
                   autoComplete="new-password"
                 />
               </div>
             )}
 
-            {error && (
-              <p className="text-sm text-red-100 glass-error rounded-xl px-3 py-2">{error}</p>
-            )}
+            {error && <p className="login-error">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="login-btn glass-btn w-full justify-center py-3 mt-2 disabled:opacity-60"
+              className="login-btn w-full justify-center py-3 mt-2 disabled:opacity-60"
             >
               {loading
                 ? isRegister
@@ -155,14 +153,14 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
             </button>
           </form>
 
-          <p className="text-center text-sm text-white/75 mt-5">
+          <p className="text-center text-sm text-muted mt-5">
             {isRegister ? (
               <>
                 Already have an account?{' '}
                 <button
                   type="button"
                   onClick={() => switchMode('signin')}
-                  className="text-white font-semibold underline underline-offset-2 cursor-pointer hover:text-green-pale"
+                  className="text-green-primary font-semibold underline underline-offset-2 cursor-pointer hover:text-green-mid"
                 >
                   Sign in
                 </button>
@@ -173,7 +171,7 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
                 <button
                   type="button"
                   onClick={() => switchMode('register')}
-                  className="text-white font-semibold underline underline-offset-2 cursor-pointer hover:text-green-pale"
+                  className="text-green-primary font-semibold underline underline-offset-2 cursor-pointer hover:text-green-mid"
                 >
                   Create account
                 </button>
@@ -181,12 +179,12 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
             )}
           </p>
 
-          <p className="text-center text-xs text-white/60 mt-4">
+          <p className="text-center text-xs text-muted mt-4">
             Platform administrator?{' '}
             <button
               type="button"
               onClick={onAdminPortal}
-              className="text-white/90 font-semibold underline underline-offset-2 cursor-pointer hover:text-white"
+              className="text-green-primary font-semibold underline underline-offset-2 cursor-pointer hover:text-green-mid"
             >
               Admin Portal
             </button>
