@@ -23,8 +23,8 @@ export function TaskCard({ task, index, onClick, onMoveToInProgress }: TaskCardP
           {...provided.dragHandleProps}
           onClick={onClick}
           className={`
-            bg-surface border border-border rounded-xl p-3.5 cursor-pointer shadow-sm
-            hover:shadow-md hover:border-green-pale transition-all
+            glass border border-white/50 rounded-xl p-3.5 cursor-pointer
+            hover:border-green-pale/80 hover:shadow-lg transition-all
             ${snapshot.isDragging ? 'shadow-lg rotate-1 opacity-90' : ''}
           `}
         >

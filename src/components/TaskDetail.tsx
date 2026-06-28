@@ -137,7 +137,7 @@ export function TaskDetail({
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-8 overflow-y-auto">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative bg-card rounded-xl shadow-2xl w-full max-w-5xl border border-border mb-8">
+      <div className="relative glass rounded-xl shadow-2xl w-full max-w-5xl border border-white/50 mb-8">
         {/* Top toolbar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-border">
           <div className="flex items-center gap-2 text-sm text-muted">
@@ -462,7 +462,7 @@ export function TaskDetail({
           </div>
 
           {/* Right sidebar — Details */}
-          <div className="w-full lg:w-[280px] shrink-0 p-5 bg-card border-l border-border">
+          <div className="w-full lg:w-[280px] shrink-0 p-5 glass border-l border-white/40">
             <div className="relative mb-4">
               <button
                 onClick={() => setStatusOpen(!statusOpen)}

@@ -1,15 +1,17 @@
 import { ArrowRight, LayoutDashboard, UserPlus } from 'lucide-react'
 import { useState } from 'react'
 import type { AuthResult } from '../hooks/useAuth'
+import { TerrainBackground } from './TerrainBackground'
 
 type AuthMode = 'signin' | 'register'
 
 interface LoginPageProps {
   onLogin: (username: string, password: string) => boolean
   onRegister: (username: string, password: string, confirmPassword: string) => AuthResult
+  onAdminPortal: () => void
 }
 
-export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
+export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps) {
   const [mode, setMode] = useState<AuthMode>('signin')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -63,29 +65,27 @@ export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
   const isRegister = mode === 'register'
 
   return (
-    <div className="min-h-screen bg-page flex items-center justify-center p-6">
+    <TerrainBackground className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md">
-        <div className="login-card">
+        <div className="login-card glass-panel">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/15 border border-green-light/40 mb-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl glass-icon mb-4">
               {isRegister ? (
-                <UserPlus className="w-6 h-6 text-white" />
+                <UserPlus className="w-7 h-7 text-white" />
               ) : (
-                <LayoutDashboard className="w-6 h-6 text-white" />
+                <LayoutDashboard className="w-7 h-7 text-white" />
               )}
             </div>
-            <h1 className="text-2xl font-bold text-white">
-              {isRegister ? 'Create account' : 'Welcome back'}
-            </h1>
-            <p className="text-sm text-white/70 mt-2">
+            <h1 className="text-3xl font-bold text-white tracking-tight">Terrain</h1>
+            <p className="text-sm text-white/75 mt-2">
               {isRegister
-                ? 'Set up your account and start managing your own tasks.'
+                ? 'Create your account and start managing projects.'
                 : 'Sign in to manage projects and daily updates.'}
             </p>
           </div>
 
           <form onSubmit={isRegister ? handleRegister : handleSignIn} className="space-y-4">
-            <div className="login-field-box">
+            <div className="login-field-box glass-inset">
               <label className="block text-sm font-medium text-white/90 mb-1.5">Username</label>
               <input
                 type="text"
@@ -95,13 +95,13 @@ export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
                   clearError()
                 }}
                 placeholder="Choose a username"
-                className="login-input"
+                className="login-input glass-input"
                 autoFocus
                 autoComplete="username"
               />
             </div>
 
-            <div className="login-field-box">
+            <div className="login-field-box glass-inset">
               <label className="block text-sm font-medium text-white/90 mb-1.5">Password</label>
               <input
                 type="password"
@@ -111,13 +111,13 @@ export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
                   clearError()
                 }}
                 placeholder={isRegister ? 'At least 6 characters' : 'Enter your password'}
-                className="login-input"
+                className="login-input glass-input"
                 autoComplete={isRegister ? 'new-password' : 'current-password'}
               />
             </div>
 
             {isRegister && (
-              <div className="login-field-box">
+              <div className="login-field-box glass-inset">
                 <label className="block text-sm font-medium text-white/90 mb-1.5">
                   Confirm password
                 </label>
@@ -129,22 +129,20 @@ export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
                     clearError()
                   }}
                   placeholder="Re-enter your password"
-                  className="login-input"
+                  className="login-input glass-input"
                   autoComplete="new-password"
                 />
               </div>
             )}
 
             {error && (
-              <p className="text-sm text-red-200 bg-red-900/20 border border-red-300/30 rounded-xl px-3 py-2">
-                {error}
-              </p>
+              <p className="text-sm text-red-100 glass-error rounded-xl px-3 py-2">{error}</p>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="login-btn w-full justify-center py-3 mt-2 disabled:opacity-60"
+              className="login-btn glass-btn w-full justify-center py-3 mt-2 disabled:opacity-60"
             >
               {loading
                 ? isRegister
@@ -157,7 +155,7 @@ export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
             </button>
           </form>
 
-          <p className="text-center text-sm text-white/70 mt-5">
+          <p className="text-center text-sm text-white/75 mt-5">
             {isRegister ? (
               <>
                 Already have an account?{' '}
@@ -182,8 +180,19 @@ export function LoginPage({ onLogin, onRegister }: LoginPageProps) {
               </>
             )}
           </p>
+
+          <p className="text-center text-xs text-white/60 mt-4">
+            Platform administrator?{' '}
+            <button
+              type="button"
+              onClick={onAdminPortal}
+              className="text-white/90 font-semibold underline underline-offset-2 cursor-pointer hover:text-white"
+            >
+              Admin Portal
+            </button>
+          </p>
         </div>
       </div>
-    </div>
+    </TerrainBackground>
   )
 }

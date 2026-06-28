@@ -17,37 +17,51 @@ function boardKey(username: string) {
   return `${LEGACY_STORAGE_KEY}-${username.toLowerCase()}`
 }
 
+function parseBoardState(parsed: Record<string, unknown>, username: string): BoardState {
+  return {
+    ...defaultState(username),
+    ...parsed,
+    tasks: ((parsed.tasks as Task[]) ?? []).map((t) => normalizeTask(t)),
+    projects: (parsed.projects as Project[]) ?? [],
+    defaultReporter: (parsed.defaultReporter as string) || username,
+  }
+}
+
 function loadState(username: string): BoardState {
   try {
     const key = boardKey(username)
-    let raw = localStorage.getItem(key)
+    const raw = localStorage.getItem(key)
 
-    if (!raw) {
-      raw =
+    if (raw) {
+      return parseBoardState(JSON.parse(raw), username)
+    }
+
+    // Migrate legacy shared storage only for the original admin account
+    if (username.toLowerCase() === 'admin') {
+      const legacy =
         localStorage.getItem(LEGACY_STORAGE_KEY) ||
-        localStorage.getItem('personal-jira-kanban') ||
-        null
+        localStorage.getItem('personal-jira-kanban')
+      if (legacy) {
+        const state = parseBoardState(JSON.parse(legacy), username)
+        localStorage.setItem(key, JSON.stringify(state))
+        return state
+      }
     }
 
-    if (!raw) return defaultState(username)
-
-    const parsed = JSON.parse(raw)
-    const state: BoardState = {
-      ...defaultState(username),
-      ...parsed,
-      tasks: (parsed.tasks ?? []).map((t: Task) => normalizeTask(t)),
-      projects: parsed.projects ?? [],
-      defaultReporter: parsed.defaultReporter || username,
-    }
-
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, JSON.stringify(state))
-    }
-
-    return state
+    return defaultState(username)
   } catch {
     return defaultState(username)
   }
+}
+
+export function initEmptyBoardForUser(username: string) {
+  const state = defaultState(username.trim())
+  localStorage.setItem(boardKey(username), JSON.stringify(state))
+  return state
+}
+
+export function clearBoardForUser(username: string) {
+  localStorage.removeItem(boardKey(username))
 }
 
 function saveState(username: string, state: BoardState) {

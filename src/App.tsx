@@ -7,11 +7,14 @@ import { DashboardOverview } from './components/DashboardOverview'
 import { HelpModal } from './components/HelpModal'
 import { ImportDataModal } from './components/ImportDataModal'
 import { LoginPage } from './components/LoginPage'
+import { AdminLoginPage } from './components/AdminLoginPage'
+import { AdminPortal } from './components/AdminPortal'
 import { ProgressPanel } from './components/ProgressPanel'
 import { Sidebar } from './components/Sidebar'
 import { TaskDetail } from './components/TaskDetail'
 import { TaskModal } from './components/TaskModal'
 import { TopBar } from './components/TopBar'
+import { TerrainBackground } from './components/TerrainBackground'
 import { useAuth } from './hooks/useAuth'
 import { useBoard } from './hooks/useBoard'
 
@@ -30,11 +33,54 @@ const VIEW_META: Record<AppView, { title: string; subtitle: string }> = {
 }
 
 export default function App() {
-  const { session, login, register, logout } = useAuth()
-  const board = useBoard(session?.name ?? null)
+  const {
+    session,
+    login,
+    platformAdminLogin,
+    register,
+    logout,
+    listUsers,
+    addUserAccount,
+    removeUserAccount,
+  } = useAuth()
+  const board = useBoard(session?.role === 'user' ? session.name : null)
+  const [authView, setAuthView] = useState<'user' | 'admin'>('user')
+  const [userListVersion, setUserListVersion] = useState(0)
+
+  const users = useMemo(() => {
+    void userListVersion
+    return listUsers()
+  }, [listUsers, userListVersion])
 
   if (!session) {
-    return <LoginPage onLogin={login} onRegister={register} />
+    if (authView === 'admin') {
+      return (
+        <AdminLoginPage
+          onLogin={platformAdminLogin}
+          onBack={() => setAuthView('user')}
+        />
+      )
+    }
+    return (
+      <LoginPage
+        onLogin={login}
+        onRegister={register}
+        onAdminPortal={() => setAuthView('admin')}
+      />
+    )
+  }
+
+  if (session.role === 'platform_admin') {
+    return (
+      <AdminPortal
+        adminName={session.name}
+        users={users}
+        onAddUser={addUserAccount}
+        onRemoveUser={removeUserAccount}
+        onLogout={logout}
+        onRefresh={() => setUserListVersion((v) => v + 1)}
+      />
+    )
   }
 
   return <AdminDashboard sessionName={session.name} onLogout={logout} board={board} />
@@ -139,7 +185,8 @@ function AdminDashboard({
   const meta = VIEW_META[currentView]
 
   return (
-    <div className="flex h-screen overflow-hidden bg-page">
+    <TerrainBackground className="h-screen overflow-hidden">
+      <div className="flex h-full overflow-hidden">
       <Sidebar
         currentView={currentView}
         onNavigate={setCurrentView}
@@ -260,6 +307,7 @@ function AdminDashboard({
         onAddLinkedItem={addLinkedItem}
         onRemoveLinkedItem={removeLinkedItem}
       />
-    </div>
+      </div>
+    </TerrainBackground>
   )
 }

@@ -8,9 +8,9 @@ interface TopBarProps {
 
 export function TopBar({ searchQuery, onSearchChange, userName }: TopBarProps) {
   return (
-    <header className="shrink-0 flex items-center gap-4 px-5 py-3 border-b border-border bg-white">
+    <header className="shrink-0 flex items-center gap-4 px-5 py-3 glass-topbar border-b border-white/30">
       <div className="flex-1 max-w-lg">
-        <div className="flex items-center w-full rounded-full border-[1.5px] border-green-pale bg-white transition-shadow focus-within:border-green-light focus-within:shadow-[0_0_0_3px_rgba(183,228,199,0.35)]">
+        <div className="flex items-center w-full rounded-full glass-search border-[1.5px] border-green-pale/60 transition-shadow focus-within:border-green-light focus-within:shadow-[0_0_0_3px_rgba(183,228,199,0.35)]">
           <Search className="w-4 h-4 text-muted shrink-0 ml-4" />
           <input
             type="text"

@@ -47,7 +47,9 @@ export function Column({
             {...provided.droppableProps}
             className={`
               flex-1 flex flex-col gap-2.5 p-3 rounded-2xl min-h-[240px] transition-colors
-              ${snapshot.isDraggingOver ? 'bg-green-bg border-2 border-dashed border-green-pale' : 'bg-elevated/50'}
+              ${snapshot.isDraggingOver
+                ? 'glass-green border-2 border-dashed border-green-pale/60'
+                : 'glass border border-white/40'}
             `}
           >
             {tasks.map((task, index) => (

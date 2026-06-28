@@ -240,9 +240,9 @@ export function DashboardOverview({
         <div className="min-h-0 grid grid-cols-12 gap-3">
           <div className="col-span-5 card-compact flex flex-col min-h-0 overflow-hidden">
             <div className="shrink-0 flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-text">Team Collaboration</h3>
+              <h3 className="text-sm font-semibold text-text">Tasks Collaboration</h3>
               <button onClick={onCreateClick} className="btn-outline text-[10px] py-1 px-2">
-                <Plus className="w-3 h-3" /> Add Member
+                <Plus className="w-3 h-3" /> Add Multiple Tasks
               </button>
             </div>
             <div className="flex-1 min-h-0 overflow-hidden space-y-1.5">
@@ -326,7 +326,7 @@ export function DashboardOverview({
             </div>
           </div>
 
-          <div className="col-span-4 card-green-dark flex flex-col items-center justify-center min-h-0 relative overflow-hidden">
+          <div className="col-span-4 card-green-dark glass-green-dark flex flex-col items-center justify-center min-h-0 relative overflow-hidden">
             <div className="absolute inset-0 opacity-20 pointer-events-none">
               <svg viewBox="0 0 400 200" className="w-full h-full" preserveAspectRatio="none">
                 <path d="M0,80 Q100,40 200,80 T400,80 L400,200 L0,200 Z" fill="#74c69d" />
