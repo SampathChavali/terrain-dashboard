@@ -38,7 +38,7 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-muted hover:text-text mb-6 cursor-pointer"
+            className="flex items-center gap-1.5 text-sm login-back mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to user login
@@ -46,17 +46,17 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
 
           <div className="text-center mb-8">
             <div className="login-icon inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4">
-              <Shield className="w-7 h-7 text-green-primary" />
+              <Shield className="w-7 h-7" />
             </div>
-            <h1 className="text-3xl font-bold text-text tracking-tight">Admin Portal</h1>
-            <p className="text-sm text-muted mt-2">
+            <h1 className="text-3xl font-bold tracking-tight">Admin Portal</h1>
+            <p className="text-sm login-muted mt-2">
               Platform administrator access — manage user accounts
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="login-field-box">
-              <label className="block text-sm font-semibold text-text mb-1.5">
+              <label className="block text-sm mb-1.5">
                 Admin username
               </label>
               <input
@@ -74,7 +74,7 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
             </div>
 
             <div className="login-field-box">
-              <label className="block text-sm font-semibold text-text mb-1.5">
+              <label className="block text-sm mb-1.5">
                 Admin password
               </label>
               <input

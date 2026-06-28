@@ -71,13 +71,13 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
           <div className="text-center mb-8">
             <div className="login-icon inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4">
               {isRegister ? (
-                <UserPlus className="w-7 h-7 text-green-primary" />
+                <UserPlus className="w-7 h-7" />
               ) : (
-                <LayoutDashboard className="w-7 h-7 text-green-primary" />
+                <LayoutDashboard className="w-7 h-7" />
               )}
             </div>
-            <h1 className="text-3xl font-bold text-text tracking-tight">Terrain</h1>
-            <p className="text-sm text-muted mt-2">
+            <h1 className="text-3xl font-bold tracking-tight">Terrain</h1>
+            <p className="text-sm login-muted mt-2">
               {isRegister
                 ? 'Create your account and start managing projects.'
                 : 'Sign in to manage projects and daily updates.'}
@@ -86,7 +86,7 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
 
           <form onSubmit={isRegister ? handleRegister : handleSignIn} className="space-y-4">
             <div className="login-field-box">
-              <label className="block text-sm font-semibold text-text mb-1.5">Username</label>
+              <label className="block text-sm mb-1.5">Username</label>
               <input
                 type="text"
                 value={username}
@@ -102,7 +102,7 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
             </div>
 
             <div className="login-field-box">
-              <label className="block text-sm font-semibold text-text mb-1.5">Password</label>
+              <label className="block text-sm mb-1.5">Password</label>
               <input
                 type="password"
                 value={password}
@@ -118,7 +118,7 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
 
             {isRegister && (
               <div className="login-field-box">
-                <label className="block text-sm font-semibold text-text mb-1.5">
+                <label className="block text-sm mb-1.5">
                   Confirm password
                 </label>
                 <input
@@ -153,39 +153,27 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
             </button>
           </form>
 
-          <p className="text-center text-sm text-muted mt-5">
+          <p className="text-center text-sm login-muted mt-5">
             {isRegister ? (
               <>
                 Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => switchMode('signin')}
-                  className="text-green-primary font-semibold underline underline-offset-2 cursor-pointer hover:text-green-mid"
-                >
+                <button type="button" onClick={() => switchMode('signin')} className="login-link">
                   Sign in
                 </button>
               </>
             ) : (
               <>
                 Don&apos;t have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => switchMode('register')}
-                  className="text-green-primary font-semibold underline underline-offset-2 cursor-pointer hover:text-green-mid"
-                >
+                <button type="button" onClick={() => switchMode('register')} className="login-link">
                   Create account
                 </button>
               </>
             )}
           </p>
 
-          <p className="text-center text-xs text-muted mt-4">
+          <p className="text-center text-xs login-muted mt-4">
             Platform administrator?{' '}
-            <button
-              type="button"
-              onClick={onAdminPortal}
-              className="text-green-primary font-semibold underline underline-offset-2 cursor-pointer hover:text-green-mid"
-            >
+            <button type="button" onClick={onAdminPortal} className="login-link">
               Admin Portal
             </button>
           </p>
