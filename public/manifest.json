@@ -1,0 +1,17 @@
+{
+  "name": "Terrain",
+  "short_name": "Terrain",
+  "description": "Terrain project management dashboard",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0f281c",
+  "theme_color": "#1b4332",
+  "icons": [
+    {
+      "src": "terrain-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

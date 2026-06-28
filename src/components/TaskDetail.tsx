@@ -136,10 +136,10 @@ export function TaskDetail({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-8 overflow-y-auto">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative glass rounded-xl shadow-2xl w-full max-w-5xl border border-white/50 mb-8">
+      <div className="absolute inset-0 bg-black/65" onClick={onClose} />
+      <div className="relative glass-modal rounded-xl shadow-2xl w-full max-w-5xl border border-white/12 mb-8">
         {/* Top toolbar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
           <div className="flex items-center gap-2 text-sm text-muted">
             <span>Terrain</span>
             <span>/</span>
@@ -177,7 +177,7 @@ export function TaskDetail({
             {task.description && (
               <section className="mb-6">
                 <h3 className="text-sm font-semibold text-text mb-2">Description</h3>
-                <p className="text-sm text-text leading-relaxed whitespace-pre-wrap bg-card rounded-lg p-4">
+                <p className="text-sm text-text leading-relaxed whitespace-pre-wrap glass-inner p-4">
                   {task.description}
                 </p>
               </section>
@@ -195,7 +195,7 @@ export function TaskDetail({
                     style={{ width: `${dodPct}%` }}
                   />
                 </div>
-                <ul className="space-y-1 bg-card rounded-lg p-4">
+                <ul className="space-y-1 glass-inner p-4">
                   {task.definitionOfDone.map((item, i) => (
                     <li key={i}>
                       <button
@@ -257,7 +257,7 @@ export function TaskDetail({
                     return (
                       <li
                         key={item.id}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-green-pale bg-elevated"
+                        className="flex items-center gap-3 p-3 rounded-lg glass-inner"
                       >
                         {isImage ? (
                           <img
@@ -277,7 +277,7 @@ export function TaskDetail({
                         <a
                           href={item.fileData}
                           download={item.fileName}
-                          className="p-1.5 rounded-lg hover:bg-white text-green-primary cursor-pointer"
+                          className="p-1.5 rounded-lg hover:bg-white/10 text-green-light cursor-pointer"
                           title="Download"
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -287,7 +287,7 @@ export function TaskDetail({
                             href={item.fileData}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-1.5 rounded-lg hover:bg-white text-muted cursor-pointer"
+                            className="p-1.5 rounded-lg hover:bg-white/10 text-muted cursor-pointer"
                             title="Preview"
                           >
                             <Image className="w-4 h-4" />
@@ -339,10 +339,10 @@ export function TaskDetail({
                 <Avatar name={authorName} />
                 <div className="flex-1">
                   <div
-                    className={`border rounded-lg transition-all bg-elevated ${
+                    className={`glass-inner transition-all ${
                       commentFocused
-                        ? 'border-jira-blue ring-2 ring-jira-blue/10'
-                        : 'border-border hover:border-zinc-300'
+                        ? 'border-green-light ring-2 ring-green-light/20'
+                        : 'hover:border-white/20'
                     }`}
                   >
                     <textarea
@@ -351,7 +351,7 @@ export function TaskDetail({
                       onFocus={() => setCommentFocused(true)}
                       placeholder="Add a comment..."
                       rows={commentFocused ? 3 : 1}
-                      className="w-full px-3 py-2.5 text-sm text-text bg-elevated resize-none focus:outline-none rounded-lg"
+                      className="w-full px-3 py-2.5 text-sm text-white bg-transparent resize-none focus:outline-none rounded-lg placeholder:text-white/40"
                     />
                     {commentFocused && (
                       <div className="px-3 pb-2 flex flex-wrap gap-2">
@@ -410,7 +410,7 @@ export function TaskDetail({
                           <span className="text-xs text-muted">
                             {relativeTime(update.createdAt)}
                           </span>
-                          <span className="text-[10px] text-muted bg-card px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] text-muted glass-inner px-1.5 py-0.5 rounded">
                             Daily update
                           </span>
                         </div>
@@ -462,7 +462,7 @@ export function TaskDetail({
           </div>
 
           {/* Right sidebar — Details */}
-          <div className="w-full lg:w-[280px] shrink-0 p-5 glass border-l border-white/40">
+          <div className="w-full lg:w-[280px] shrink-0 p-5 glass-modal border-l border-white/10">
             <div className="relative mb-4">
               <button
                 onClick={() => setStatusOpen(!statusOpen)}
@@ -472,7 +472,7 @@ export function TaskDetail({
                 <ChevronDown className="w-4 h-4" />
               </button>
               {statusOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-elevated border border-border rounded-lg shadow-lg z-10 overflow-hidden">
+                <div className="absolute top-full left-0 right-0 mt-1 glass-inner shadow-lg z-10 overflow-hidden">
                   {COLUMNS.map((col) => (
                     <button
                       key={col.id}
@@ -539,6 +539,20 @@ export function TaskDetail({
                     </div>
                   ) : (
                     <span className="text-sm text-muted">Add labels</span>
+                  )}
+                </SidebarField>
+
+                <SidebarField label="Deadline">
+                  {task.deadline ? (
+                    <span className="text-sm text-text flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-muted" />
+                      {formatDate(task.deadline + 'T12:00:00')}
+                      {task.reminderEnabled && (
+                        <span className="text-[10px] text-green-light ml-1">· reminder on</span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-sm text-muted">No deadline</span>
                   )}
                 </SidebarField>
 

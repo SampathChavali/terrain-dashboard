@@ -48,6 +48,12 @@ export interface Task {
   linkedItems: LinkedWorkItem[]
   createdAt: string
   updatedAt: string
+  /** Due date (YYYY-MM-DD) */
+  deadline?: string
+  /** Desktop / mobile notification on deadline day */
+  reminderEnabled?: boolean
+  /** Time to fire reminder on deadline day (HH:mm) */
+  reminderTime?: string
 }
 
 export interface Project {
@@ -121,6 +127,9 @@ export function normalizeTask(task: Partial<Task> & Pick<Task, 'id' | 'key' | 't
     linkedItems: task.linkedItems ?? [],
     createdAt: task.createdAt,
     updatedAt: task.updatedAt,
+    deadline: task.deadline ?? '',
+    reminderEnabled: task.reminderEnabled ?? false,
+    reminderTime: task.reminderTime ?? '09:00',
   }
 }
 

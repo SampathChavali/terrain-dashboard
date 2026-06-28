@@ -1,13 +1,15 @@
-import { LogOut, Plus, Shield, Trash2, Users } from 'lucide-react'
+import { AlertTriangle, LogOut, Plus, Shield, Trash2, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import type { StoredUser } from '../hooks/useAuth'
+import type { AuthResult, StoredUser } from '../hooks/useAuth'
+import { isUsingLocalStorageOnly } from '../lib/userStore'
 import { TerrainBackground } from './TerrainBackground'
 
 interface AdminPortalProps {
   adminName: string
   users: StoredUser[]
-  onAddUser: (username: string, password: string) => { success: true } | { success: false; error: string }
-  onRemoveUser: (username: string) => { success: true } | { success: false; error: string }
+  usersLoading: boolean
+  onAddUser: (username: string, password: string) => Promise<AuthResult>
+  onRemoveUser: (username: string) => Promise<AuthResult>
   onLogout: () => void
   onRefresh: () => void
 }
@@ -15,6 +17,7 @@ interface AdminPortalProps {
 export function AdminPortal({
   adminName,
   users,
+  usersLoading,
   onAddUser,
   onRemoveUser,
   onLogout,
@@ -25,13 +28,15 @@ export function AdminPortal({
   const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
+  const localOnly = isUsingLocalStorageOnly()
 
   const sortedUsers = useMemo(
     () => [...users].sort((a, b) => a.username.localeCompare(b.username)),
     [users],
   )
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
     setMessage('')
     setError('')
@@ -41,7 +46,10 @@ export function AdminPortal({
       return
     }
 
-    const result = onAddUser(username.trim(), password)
+    setSaving(true)
+    const result = await onAddUser(username.trim(), password)
+    setSaving(false)
+
     if (!result.success) {
       setError(result.error)
       return
@@ -54,12 +62,15 @@ export function AdminPortal({
     onRefresh()
   }
 
-  const handleRemove = (name: string) => {
+  const handleRemove = async (name: string) => {
     if (!confirm(`Remove account "${name}"? Their tasks will be deleted permanently.`)) return
 
     setMessage('')
     setError('')
-    const result = onRemoveUser(name)
+    setSaving(true)
+    const result = await onRemoveUser(name)
+    setSaving(false)
+
     if (!result.success) {
       setError(result.error)
       return
@@ -70,7 +81,7 @@ export function AdminPortal({
   }
 
   return (
-    <TerrainBackground className="min-h-screen overflow-y-auto">
+    <TerrainBackground app className="min-h-screen overflow-y-auto">
       <div className="max-w-4xl mx-auto p-6 lg:p-8">
         <header className="glass-panel rounded-2xl p-6 mb-6 flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-4">
@@ -89,6 +100,20 @@ export function AdminPortal({
             Logout
           </button>
         </header>
+
+        {localOnly && (
+          <div className="card mb-6 border-amber-200 bg-amber-50/90 flex gap-3 items-start">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-900">Accounts are stored per browser only</p>
+              <p className="text-xs text-amber-800 mt-1">
+                When someone creates an account on their phone or computer, it only exists on that
+                device. You will not see it here until cloud sync is enabled. Ask your admin to
+                connect Supabase, or add accounts manually from this portal.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           <div className="card-compact flex items-center gap-3">
@@ -138,7 +163,7 @@ export function AdminPortal({
                   placeholder="Re-enter password"
                 />
               </div>
-              <button type="submit" className="btn-primary w-full justify-center">
+              <button type="submit" disabled={saving} className="btn-primary w-full justify-center disabled:opacity-60">
                 <Plus className="w-4 h-4" />
                 Add Account
               </button>
@@ -161,7 +186,9 @@ export function AdminPortal({
             )}
 
             <div className="space-y-2 max-h-[320px] overflow-y-auto">
-              {sortedUsers.length === 0 ? (
+              {usersLoading ? (
+                <p className="text-sm text-muted text-center py-8">Loading accounts...</p>
+              ) : sortedUsers.length === 0 ? (
                 <p className="text-sm text-muted text-center py-8">No user accounts yet</p>
               ) : (
                 sortedUsers.map((user) => (
@@ -180,8 +207,9 @@ export function AdminPortal({
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleRemove(user.username)}
-                      className="p-2 rounded-lg text-red-500 hover:bg-red-50 cursor-pointer shrink-0"
+                      onClick={() => void handleRemove(user.username)}
+                      disabled={saving}
+                      className="p-2 rounded-lg text-red-500 hover:bg-red-50 cursor-pointer shrink-0 disabled:opacity-50"
                       title="Remove account"
                     >
                       <Trash2 className="w-4 h-4" />

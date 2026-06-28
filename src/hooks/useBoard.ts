@@ -96,6 +96,9 @@ export function useBoard(username: string | null) {
       labels: string[]
       status?: TaskStatus
       definitionOfDone?: string[]
+      deadline?: string
+      reminderEnabled?: boolean
+      reminderTime?: string
     }) => {
       const now = new Date().toISOString()
       const key = `${state.projectKey}-${state.nextNumber}`
@@ -118,6 +121,9 @@ export function useBoard(username: string | null) {
         linkedItems: [],
         createdAt: now,
         updatedAt: now,
+        deadline: data.deadline ?? '',
+        reminderEnabled: data.reminderEnabled ?? false,
+        reminderTime: data.reminderTime ?? '09:00',
       })
 
       setState((prev) => ({

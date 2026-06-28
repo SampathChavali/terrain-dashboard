@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
+import { Bell, X } from 'lucide-react'
 import type { Task, TaskPriority, TaskStatus } from '../types'
 import { COLUMNS, PRIORITY_CONFIG } from '../types'
+import { requestNotificationPermission } from '../hooks/useTaskDeadlineNotifications'
 
 interface TaskModalProps {
   open: boolean
@@ -19,6 +20,9 @@ interface TaskModalProps {
     labels: string[]
     status: TaskStatus
     definitionOfDone: string[]
+    deadline: string
+    reminderEnabled: boolean
+    reminderTime: string
   }) => void
 }
 
@@ -39,6 +43,9 @@ export function TaskModal({
   const [labelsInput, setLabelsInput] = useState('')
   const [dodInput, setDodInput] = useState('')
   const [status, setStatus] = useState<TaskStatus>(defaultStatus)
+  const [deadline, setDeadline] = useState('')
+  const [reminderEnabled, setReminderEnabled] = useState(false)
+  const [reminderTime, setReminderTime] = useState('09:00')
 
   useEffect(() => {
     if (!open) return
@@ -51,6 +58,9 @@ export function TaskModal({
       setLabelsInput(task.labels.join(', '))
       setDodInput(task.definitionOfDone.join('\n'))
       setStatus(task.status)
+      setDeadline(task.deadline ?? '')
+      setReminderEnabled(task.reminderEnabled ?? false)
+      setReminderTime(task.reminderTime ?? '09:00')
     } else {
       setTitle('')
       setDescription('')
@@ -60,14 +70,24 @@ export function TaskModal({
       setLabelsInput('')
       setDodInput('')
       setStatus(defaultStatus)
+      setDeadline('')
+      setReminderEnabled(false)
+      setReminderTime('09:00')
     }
   }, [open, mode, task, defaultReporter, defaultStatus])
 
   if (!open) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim()) return
+
+    if (reminderEnabled && deadline) {
+      const perm = await requestNotificationPermission()
+      if (perm === 'denied') {
+        alert('Notifications are blocked. Enable them in browser settings to get deadline reminders.')
+      }
+    }
 
     const labels = labelsInput
       .split(',')
@@ -88,18 +108,28 @@ export function TaskModal({
       labels,
       status,
       definitionOfDone,
+      deadline,
+      reminderEnabled: reminderEnabled && Boolean(deadline),
+      reminderTime,
     })
     onClose()
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative glass rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/50">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-text">
-            {mode === 'create' ? 'Create Task' : `Edit ${task?.key}`}
-          </h2>
+      <div className="absolute inset-0 bg-black/65" onClick={onClose} />
+      <div className="relative glass-modal rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/12">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+          <div>
+            <h2 className="text-lg font-semibold text-white">
+              {mode === 'create' ? 'Create Task' : `Edit ${task?.key}`}
+            </h2>
+            {mode === 'edit' && task && (
+              <p className="text-xs text-white/60 mt-0.5">
+                Created {new Date(task.createdAt).toLocaleString()}
+              </p>
+            )}
+          </div>
           <button
             onClick={onClose}
             className="p-1 rounded-lg hover:bg-card text-muted cursor-pointer"
@@ -182,6 +212,39 @@ export function TaskModal({
             </Field>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Deadline">
+              <input
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="input-field"
+              />
+            </Field>
+
+            <Field label="Reminder time">
+              <input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="input-field"
+                disabled={!deadline}
+              />
+            </Field>
+          </div>
+
+          <label className="flex items-center gap-2 text-sm text-white/85 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={reminderEnabled}
+              onChange={(e) => setReminderEnabled(e.target.checked)}
+              disabled={!deadline}
+              className="rounded border-white/30"
+            />
+            <Bell className="w-4 h-4 text-green-light" />
+            Notify me on deadline (laptop &amp; phone if app is installed)
+          </label>
+
           <Field label="Definition of Done (one per line)">
             <textarea
               value={dodInput}
@@ -231,7 +294,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-medium text-muted uppercase tracking-wide">
+      <span className="text-xs font-medium text-white/70 uppercase tracking-wide">
         {label}
         {required && <span className="text-red-500 ml-0.5">*</span>}
       </span>

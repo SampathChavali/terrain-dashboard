@@ -1,5 +1,5 @@
 import { Draggable } from '@hello-pangea/dnd'
-import { ArrowRight, User } from 'lucide-react'
+import { ArrowRight, Calendar, User } from 'lucide-react'
 import type { Task } from '../types'
 import { getDodProgress, PRIORITY_CONFIG } from '../types'
 
@@ -23,8 +23,8 @@ export function TaskCard({ task, index, onClick, onMoveToInProgress }: TaskCardP
           {...provided.dragHandleProps}
           onClick={onClick}
           className={`
-            glass border border-white/50 rounded-xl p-3.5 cursor-pointer
-            hover:border-green-pale/80 hover:shadow-lg transition-all
+            glass border border-white/15 rounded-xl p-3.5 cursor-pointer
+            hover:border-green-pale/40 hover:shadow-lg transition-all
             ${snapshot.isDragging ? 'shadow-lg rotate-1 opacity-90' : ''}
           `}
         >
@@ -38,7 +38,14 @@ export function TaskCard({ task, index, onClick, onMoveToInProgress }: TaskCardP
             </span>
           </div>
 
-          <h3 className="text-sm font-medium text-text leading-snug mb-3">{task.title}</h3>
+          <h3 className="text-sm font-medium text-text leading-snug mb-2">{task.title}</h3>
+
+          {task.deadline && (
+            <div className="flex items-center gap-1 text-[10px] text-green-light mb-2">
+              <Calendar className="w-3 h-3" />
+              <span>Due {new Date(task.deadline + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            </div>
+          )}
 
           {task.status === 'in_progress' && task.definitionOfDone.length > 0 && (
             <div className="mb-3">

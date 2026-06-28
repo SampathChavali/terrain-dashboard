@@ -49,7 +49,7 @@ export function Column({
               flex-1 flex flex-col gap-2.5 p-3 rounded-2xl min-h-[240px] transition-colors
               ${snapshot.isDraggingOver
                 ? 'glass-green border-2 border-dashed border-green-pale/60'
-                : 'glass border border-white/40'}
+                : 'glass border border-white/15'}
             `}
           >
             {tasks.map((task, index) => (

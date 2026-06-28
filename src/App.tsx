@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import type { AppView, Task, TaskStatus } from './types'
 import { VIEW_TO_STATUS } from './types'
@@ -15,8 +15,10 @@ import { TaskDetail } from './components/TaskDetail'
 import { TaskModal } from './components/TaskModal'
 import { TopBar } from './components/TopBar'
 import { TerrainBackground } from './components/TerrainBackground'
+import type { StoredUser } from './hooks/useAuth'
 import { useAuth } from './hooks/useAuth'
 import { useBoard } from './hooks/useBoard'
+import { useTaskDeadlineNotifications } from './hooks/useTaskDeadlineNotifications'
 
 type ModalState =
   | { type: 'closed' }
@@ -45,12 +47,25 @@ export default function App() {
   } = useAuth()
   const board = useBoard(session?.role === 'user' ? session.name : null)
   const [authView, setAuthView] = useState<'user' | 'admin'>('user')
-  const [userListVersion, setUserListVersion] = useState(0)
+  const [users, setUsers] = useState<StoredUser[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
 
-  const users = useMemo(() => {
-    void userListVersion
-    return listUsers()
-  }, [listUsers, userListVersion])
+  const refreshUsers = useCallback(async () => {
+    setUsersLoading(true)
+    try {
+      setUsers(await listUsers())
+    } catch {
+      setUsers([])
+    } finally {
+      setUsersLoading(false)
+    }
+  }, [listUsers])
+
+  useEffect(() => {
+    if (session?.role === 'platform_admin') {
+      void refreshUsers()
+    }
+  }, [session?.role, refreshUsers])
 
   if (!session) {
     if (authView === 'admin') {
@@ -75,10 +90,11 @@ export default function App() {
       <AdminPortal
         adminName={session.name}
         users={users}
+        usersLoading={usersLoading}
         onAddUser={addUserAccount}
         onRemoveUser={removeUserAccount}
         onLogout={logout}
-        onRefresh={() => setUserListVersion((v) => v + 1)}
+        onRefresh={() => void refreshUsers()}
       />
     )
   }
@@ -162,6 +178,9 @@ function AdminDashboard({
     labels: string[]
     status: TaskStatus
     definitionOfDone: string[]
+    deadline: string
+    reminderEnabled: boolean
+    reminderTime: string
   }) => {
     setDefaultReporter(data.reporter)
     if (modal.type === 'edit') {
@@ -184,8 +203,10 @@ function AdminDashboard({
 
   const meta = VIEW_META[currentView]
 
+  useTaskDeadlineNotifications(state.tasks)
+
   return (
-    <TerrainBackground className="h-screen overflow-hidden">
+    <TerrainBackground app className="h-screen overflow-hidden">
       <div className="flex h-full overflow-hidden">
       <Sidebar
         currentView={currentView}

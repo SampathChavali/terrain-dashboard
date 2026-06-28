@@ -6,8 +6,8 @@ import { TerrainBackground } from './TerrainBackground'
 type AuthMode = 'signin' | 'register'
 
 interface LoginPageProps {
-  onLogin: (username: string, password: string) => boolean
-  onRegister: (username: string, password: string, confirmPassword: string) => AuthResult
+  onLogin: (username: string, password: string) => Promise<boolean>
+  onRegister: (username: string, password: string, confirmPassword: string) => Promise<AuthResult>
   onAdminPortal: () => void
 }
 
@@ -30,7 +30,7 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
     setConfirmPassword('')
   }
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!username.trim() || !password.trim()) {
       setError('Please enter username and password')
@@ -40,7 +40,7 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
     setLoading(true)
     setError('')
 
-    const ok = onLogin(username.trim(), password)
+    const ok = await onLogin(username.trim(), password)
     setLoading(false)
 
     if (!ok) {
@@ -49,12 +49,12 @@ export function LoginPage({ onLogin, onRegister, onAdminPortal }: LoginPageProps
     }
   }
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    const result = onRegister(username.trim(), password, confirmPassword)
+    const result = await onRegister(username.trim(), password, confirmPassword)
     setLoading(false)
 
     if (!result.success) {

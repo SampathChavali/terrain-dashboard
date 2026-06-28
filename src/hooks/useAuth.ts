@@ -1,5 +1,16 @@
 import { useCallback, useState } from 'react'
+import {
+  addUser,
+  fetchAllUsers,
+  removeUser,
+  userExists,
+  verifyUserCredentials,
+  type AuthResult,
+  type StoredUser,
+} from '../lib/userStore'
 import { clearBoardForUser, initEmptyBoardForUser } from './useBoard'
+
+export type { AuthResult, StoredUser }
 
 export type UserRole = 'user' | 'platform_admin'
 
@@ -9,31 +20,18 @@ export interface UserSession {
   loggedInAt: string
 }
 
-export interface StoredUser {
-  username: string
-  password: string
-}
-
 export interface PlatformAdmin {
   username: string
   password: string
 }
 
-export type AuthResult = { success: true } | { success: false; error: string }
-
 const SESSION_KEY = 'personal-jira-session'
-const USERS_KEY = 'personal-jira-users'
 const PLATFORM_ADMIN_KEY = 'personal-jira-platform-admin'
 
 const DEFAULT_PLATFORM_ADMIN: PlatformAdmin = {
   username: 'terrain_admin',
   password: 'TerrainAdmin2026',
 }
-
-const DEFAULT_USERS: StoredUser[] = [
-  { username: 'admin', password: 'admin123' },
-  { username: 'sampath', password: 'donezo123' },
-]
 
 function loadPlatformAdmin(): PlatformAdmin {
   try {
@@ -46,24 +44,6 @@ function loadPlatformAdmin(): PlatformAdmin {
   } catch {
     return DEFAULT_PLATFORM_ADMIN
   }
-}
-
-function loadUsers(): StoredUser[] {
-  try {
-    const raw = localStorage.getItem(USERS_KEY)
-    if (!raw) {
-      localStorage.setItem(USERS_KEY, JSON.stringify(DEFAULT_USERS))
-      return DEFAULT_USERS
-    }
-    const parsed = JSON.parse(raw) as StoredUser[]
-    return parsed.length > 0 ? parsed : DEFAULT_USERS
-  } catch {
-    return DEFAULT_USERS
-  }
-}
-
-function saveUsers(users: StoredUser[]) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users))
 }
 
 function loadSession(): UserSession | null {
@@ -99,20 +79,11 @@ function createPlatformAdminSession(admin: PlatformAdmin): UserSession {
   }
 }
 
-export function verifyCredentials(username: string, password: string): boolean {
-  const users = loadUsers()
-  const normalized = username.trim().toLowerCase()
-  return users.some(
-    (u) => u.username.toLowerCase() === normalized && u.password === password,
-  )
-}
-
-function usernameExists(username: string): boolean {
-  const normalized = username.trim().toLowerCase()
-  return loadUsers().some((u) => u.username.toLowerCase() === normalized)
-}
-
-function validateNewUser(username: string, password: string, confirmPassword?: string): AuthResult {
+function validateNewUser(
+  username: string,
+  password: string,
+  confirmPassword?: string,
+): AuthResult | null {
   const trimmed = username.trim()
 
   if (!trimmed || !password) {
@@ -133,23 +104,22 @@ function validateNewUser(username: string, password: string, confirmPassword?: s
   if (confirmPassword !== undefined && password !== confirmPassword) {
     return { success: false, error: 'Passwords do not match' }
   }
-  if (usernameExists(trimmed)) {
-    return { success: false, error: 'Username already taken' }
-  }
+
   const platformAdmin = loadPlatformAdmin()
   if (trimmed.toLowerCase() === platformAdmin.username.toLowerCase()) {
     return { success: false, error: 'This username is reserved' }
   }
 
-  return { success: true }
+  return null
 }
 
 export function useAuth() {
   const [session, setSession] = useState<UserSession | null>(loadSession)
 
-  const login = useCallback((username: string, password: string): boolean => {
+  const login = useCallback(async (username: string, password: string): Promise<boolean> => {
     if (!username.trim() || !password) return false
-    if (!verifyCredentials(username, password)) return false
+    const ok = await verifyUserCredentials(username, password)
+    if (!ok) return false
 
     const next = createUserSession(username)
     localStorage.setItem(SESSION_KEY, JSON.stringify(next))
@@ -173,13 +143,18 @@ export function useAuth() {
   }, [])
 
   const register = useCallback(
-    (username: string, password: string, confirmPassword: string): AuthResult => {
+    async (username: string, password: string, confirmPassword: string): Promise<AuthResult> => {
       const validation = validateNewUser(username, password, confirmPassword)
-      if (!validation.success) return validation
+      if (validation) return validation
 
       const trimmed = username.trim()
-      const users = loadUsers()
-      saveUsers([...users, { username: trimmed, password }])
+      if (await userExists(trimmed)) {
+        return { success: false, error: 'Username already taken' }
+      }
+
+      const result = await addUser(trimmed, password)
+      if (!result.success) return result
+
       initEmptyBoardForUser(trimmed)
 
       const next = createUserSession(trimmed)
@@ -190,29 +165,32 @@ export function useAuth() {
     [],
   )
 
-  const listUsers = useCallback((): StoredUser[] => loadUsers(), [])
+  const listUsers = useCallback(async (): Promise<StoredUser[]> => fetchAllUsers(), [])
 
-  const addUserAccount = useCallback((username: string, password: string): AuthResult => {
-    const validation = validateNewUser(username, password)
-    if (!validation.success) return validation
+  const addUserAccount = useCallback(
+    async (username: string, password: string): Promise<AuthResult> => {
+      const validation = validateNewUser(username, password)
+      if (validation) return validation
 
+      const trimmed = username.trim()
+      if (await userExists(trimmed)) {
+        return { success: false, error: 'Username already taken' }
+      }
+
+      const result = await addUser(trimmed, password)
+      if (!result.success) return result
+
+      initEmptyBoardForUser(trimmed)
+      return { success: true }
+    },
+    [],
+  )
+
+  const removeUserAccount = useCallback(async (username: string): Promise<AuthResult> => {
     const trimmed = username.trim()
-    saveUsers([...loadUsers(), { username: trimmed, password }])
-    initEmptyBoardForUser(trimmed)
-    return { success: true }
-  }, [])
-
-  const removeUserAccount = useCallback((username: string): AuthResult => {
-    const trimmed = username.trim()
-    if (!trimmed) return { success: false, error: 'Invalid username' }
-
-    const users = loadUsers()
-    const exists = users.some((u) => u.username.toLowerCase() === trimmed.toLowerCase())
-    if (!exists) return { success: false, error: 'Account not found' }
-
-    saveUsers(users.filter((u) => u.username.toLowerCase() !== trimmed.toLowerCase()))
-    clearBoardForUser(trimmed)
-    return { success: true }
+    const result = await removeUser(trimmed)
+    if (result.success) clearBoardForUser(trimmed)
+    return result
   }, [])
 
   const logout = useCallback(() => {
