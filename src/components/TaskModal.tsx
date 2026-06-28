@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, X } from 'lucide-react'
+import { Bell, Calendar, X } from 'lucide-react'
 import type { Task, TaskPriority, TaskStatus } from '../types'
 import { COLUMNS, PRIORITY_CONFIG } from '../types'
 import { requestNotificationPermission } from '../hooks/useTaskDeadlineNotifications'
@@ -117,22 +117,25 @@ export function TaskModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/65" onClick={onClose} />
-      <div className="relative glass-modal rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto border border-white/12">
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="relative modal-card rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
           <div>
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-bold text-white">
               {mode === 'create' ? 'Create Task' : `Edit ${task?.key}`}
             </h2>
-            {mode === 'edit' && task && (
-              <p className="text-xs text-white/60 mt-0.5">
+            {mode === 'edit' && task ? (
+              <p className="text-xs modal-muted mt-0.5">
                 Created {new Date(task.createdAt).toLocaleString()}
               </p>
+            ) : (
+              <p className="text-xs modal-muted mt-0.5">Set a deadline to get reminders</p>
             )}
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-card text-muted cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-white/10 text-white/70 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -145,7 +148,7 @@ export function TaskModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="What needs to be done?"
-              className="input-field"
+              className="login-input"
               autoFocus
             />
           </Field>
@@ -156,9 +159,56 @@ export function TaskModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add more details..."
               rows={3}
-              className="input-field resize-none"
+              className="login-input resize-none"
             />
           </Field>
+
+          {/* Deadline & reminder — same dark glass as login */}
+          <div className="modal-reminder-box space-y-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-white">
+              <Calendar className="w-4 h-4 text-green-light" />
+              Deadline &amp; reminder
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Deadline date">
+                <input
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className="login-input"
+                />
+              </Field>
+              <Field label="Reminder time">
+                <input
+                  type="time"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  className="login-input"
+                  disabled={!deadline}
+                />
+              </Field>
+            </div>
+
+            <label className="flex items-start gap-2 text-sm text-white/85 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={reminderEnabled}
+                onChange={(e) => setReminderEnabled(e.target.checked)}
+                disabled={!deadline}
+                className="mt-0.5 rounded border-white/30"
+              />
+              <span>
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Bell className="w-4 h-4 text-green-light" />
+                  Notify me on deadline
+                </span>
+                <span className="block text-xs modal-muted mt-0.5">
+                  Popup on laptop; on phone add Terrain to Home Screen first
+                </span>
+              </span>
+            </label>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Reporter" required>
@@ -167,17 +217,16 @@ export function TaskModal({
                 value={reporter}
                 onChange={(e) => setReporter(e.target.value)}
                 placeholder="Who reported this?"
-                className="input-field"
+                className="login-input"
               />
             </Field>
-
             <Field label="Assignee">
               <input
                 type="text"
                 value={assignee}
                 onChange={(e) => setAssignee(e.target.value)}
                 placeholder="Who is working on this?"
-                className="input-field"
+                className="login-input"
               />
             </Field>
           </div>
@@ -187,7 +236,7 @@ export function TaskModal({
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                className="input-field"
+                className="login-input"
               >
                 {Object.entries(PRIORITY_CONFIG).map(([key, cfg]) => (
                   <option key={key} value={key}>
@@ -196,12 +245,11 @@ export function TaskModal({
                 ))}
               </select>
             </Field>
-
             <Field label="Status">
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                className="input-field"
+                className="login-input"
               >
                 {COLUMNS.map((col) => (
                   <option key={col.id} value={col.id}>
@@ -212,46 +260,13 @@ export function TaskModal({
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Deadline">
-              <input
-                type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                className="input-field"
-              />
-            </Field>
-
-            <Field label="Reminder time">
-              <input
-                type="time"
-                value={reminderTime}
-                onChange={(e) => setReminderTime(e.target.value)}
-                className="input-field"
-                disabled={!deadline}
-              />
-            </Field>
-          </div>
-
-          <label className="flex items-center gap-2 text-sm text-white/85 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={reminderEnabled}
-              onChange={(e) => setReminderEnabled(e.target.checked)}
-              disabled={!deadline}
-              className="rounded border-white/30"
-            />
-            <Bell className="w-4 h-4 text-green-light" />
-            Notify me on deadline (laptop &amp; phone if app is installed)
-          </label>
-
           <Field label="Definition of Done (one per line)">
             <textarea
               value={dodInput}
               onChange={(e) => setDodInput(e.target.value)}
-              placeholder={"Code reviewed\nTests passing\nDeployed to staging"}
+              placeholder={'Code reviewed\nTests passing\nDeployed to staging'}
               rows={3}
-              className="input-field resize-none"
+              className="login-input resize-none"
             />
           </Field>
 
@@ -261,18 +276,18 @@ export function TaskModal({
               value={labelsInput}
               onChange={(e) => setLabelsInput(e.target.value)}
               placeholder="bug, feature, urgent (comma separated)"
-              className="input-field"
+              className="login-input"
             />
           </Field>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-ghost">
+            <button type="button" onClick={onClose} className="modal-btn-ghost">
               Cancel
             </button>
             <button
               type="submit"
               disabled={!title.trim()}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="login-btn disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {mode === 'create' ? 'Create Task' : 'Save Changes'}
             </button>
@@ -293,12 +308,12 @@ function Field({
   children: React.ReactNode
 }) {
   return (
-    <label className="block">
-      <span className="text-xs font-medium text-white/70 uppercase tracking-wide">
+    <div className="login-field-box">
+      <label className="block text-sm mb-1.5 modal-label">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
-      </span>
-      <div className="mt-1.5">{children}</div>
-    </label>
+        {required && <span className="text-red-300 ml-0.5">*</span>}
+      </label>
+      {children}
+    </div>
   )
 }
